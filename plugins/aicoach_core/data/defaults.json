@@ -1,0 +1,11 @@
+{
+  "kind": "aicoach.defaults",
+  "schema_version": 1,
+  "profiles": [
+    { "id": "jaden", "name": "Jaden Yuki", "character": 2, "aggression": 55, "risk_tolerance": 60, "signature_bias": 60, "preferred_position": "auto", "attack_target_policy": "highest_atk", "preferred_cards": [], "fallback": "original_ai", "enabled": true },
+    { "id": "alexis", "name": "Alexis Rhodes", "character": 5, "aggression": 45, "risk_tolerance": 40, "signature_bias": 60, "preferred_position": "auto", "attack_target_policy": "first_legal", "preferred_cards": [], "fallback": "original_ai", "enabled": true },
+    { "id": "chazz", "name": "Chazz Princeton", "character": 6, "aggression": 65, "risk_tolerance": 55, "signature_bias": 50, "preferred_position": "auto", "attack_target_policy": "first_legal", "preferred_cards": [], "fallback": "original_ai", "enabled": true },
+    { "id": "zane", "name": "Zane Truesdale", "character": 8, "aggression": 70, "risk_tolerance": 45, "signature_bias": 70, "preferred_position": "attack", "attack_target_policy": "highest_atk", "preferred_cards": [], "fallback": "original_ai", "enabled": true }
+  ],
+  "combos": []
+}
