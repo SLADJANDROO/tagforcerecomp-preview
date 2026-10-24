@@ -38,5 +38,14 @@ UI, so marks will live in the mod's own file (keyed by deck), and the effect onl
 plus the words around the end of the deck. If TF1 uses the TF2 layout, the hand ids should match what the F6 panel shows and the deck array should be
 a list of u32 entries (id in the low 13 bits) whose first entry is the top card.
 
+## Tag Force 1 side: what the installed recomp (C:\Users\Admin\Desktop\TagForceRecomp) confirms
+* It is the **European** build (`ULES-00600`, `gen/`, `docs/VERSIONS.md`), the same one the AI Coach targets. The duel modules are at the same
+  bases as in the repo (`libduel_eng` at `0x09E6B800`).
+* `decomp/libduel_eng/duel_data.h` and its README confirm the field-slot layout (`0x09F79D1C`, 0x14 bytes per zone) and the player stride
+  (`0xFAC`, base `0x09F79CEC`). The hand (`+0x120`) and the counts (`+0x0C`, `+0x10`) are already used by the repo's own observer code and docs.
+* No function or table named "Destiny" exists in the generated code, which fits the wiki: Destiny Draw is not in the original GX Tag Force.
+* **Not confirmed yet:** the duel's deck order array (`+0x3A0`) and whether a draw takes entry 0. This is what the F7 `[probe]` lines test.
+* The generated code has only addresses, no names, so the draw routine can't be found there by search. Finding it needs a trace or the probe.
+
 ## Next evidence wanted
 Deck Edit states with one card marked as Destiny vs unmarked; the same duel menu in Tag Force 1 (to confirm the TF1 layout is what the AI Coach already assumes).
