@@ -15,7 +15,7 @@ git checkout -b aicoach-engine-core FETCH_HEAD     # or add your fork as a remot
 
 ## 1. Build (MSYS2 UCRT64)
 
-1. `sh tools/test/aicoach/run_tests.sh` — needs only g++; expect four sections (data model, engine, game view, plugin glue), each ending in `0 failed checks`. (If it fails on Windows only, that is useful: send the output.)
+1. `sh tools/test/aicoach/run_tests.sh` — needs only g++; expect five sections (data model, engine, game view, editor, plugin glue), each ending in `0 failed checks`. (If it fails on Windows only, that is useful: send the output.)
 2. `sh tools/build/build_plugins.sh AICoach` — expect `plugin: gen/mods/AICoach/plugin.dll`.
    - Watch for: errors about `std::filesystem` or `-lstdc++fs` (add `-lstdc++fs` only if the linker asks), name clashes between the `core_*.cpp` files (they are separate translation units, so none expected).
 3. `sh tools/test/sdk_check.sh` — the SDK guard; AICoach must build with the same flags as every other mod.
@@ -83,7 +83,7 @@ Start a **Free Duel against a known duelist** (not CPU vs CPU yet).
 
 | Question | How to see |
 |---|---|
-| Does `std::filesystem` rename replace an existing file on your MSYS2 (needed for future saving)? | not exercised by the observer; will be by the editor milestone |
+| Does `std::filesystem` rename replace an existing file on your MSYS2 (needed for saving)? | the "editor" test section saves and re-saves `user.json`; a failure there answers it |
 | Is F4 free (not a window hotkey)? | log line `tecla 115 reservada ...` means no |
 | Does the setup hook (`0883f4f8`) fire for Free Duel **and** Story duels, and only there? | one `duel setup:` pair per duel in the log |
 | Tag/2-vs-2 duels | how many `duel setup` sides are logged; the plugin assumes 2 |

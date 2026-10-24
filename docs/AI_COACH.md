@@ -183,7 +183,10 @@ Legend: **I** implemented · **C** compiled · **U** unit-tested · **G** integr
 | JSON parser, model, validation, defaults/user store, migration, import/export | yes | yes (Linux g++) | yes (23 tests) | no | no |
 | Condition evaluation, combo ranking, runner, attempt ledger (section 7) | yes | yes (Linux g++, `-Wall -Wextra -Wpedantic` clean) | yes (18 tests, ASan/UBSan; 3 deliberate bugs injected and caught) | no | no |
 | Read-only `GameDuelView` over the documented memory layout (`game_view.*`, section 9) | yes | yes (Linux g++, clean) | yes (7 tests, against a fake memory image) | no | no |
-| Plugin wiring (`tfmod_init`, hooks, `api->mem` bridge), action executor, menu, editor | no | no | no | no | no |
+| Observer plugin (`plugins/src/AICoach`) | yes | yes (Linux g++, fake API) | yes (9 scenarios) | no | no |
+| Editor logic layer (`editor.*`: screens, card picker, step/condition editing, validated saving; `docs/AI_COACH_EDITOR.md`) | yes | yes (Linux g++) | yes (`test_editor.cpp`, ASan/UBSan) | no | no |
+| Editor **UI**: pad capture without leaking to the game, drawing, hotkey (needs runtime API v7) | no | no | no | no | no |
+| Action executor, AI-tick hook, menu | no | no | no | no | no |
 
 Nothing is verified in the running game. This workspace cannot run the game (no Windows, no ISO).
 
