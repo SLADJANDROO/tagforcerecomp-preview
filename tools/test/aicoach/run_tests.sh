@@ -8,6 +8,8 @@ CORE="plugins/aicoach_core/json.cpp plugins/aicoach_core/model.cpp plugins/aicoa
 g++ $FLAGS $CORE tools/test/aicoach/test_core.cpp -o "$OUT/test_core"
 g++ $FLAGS $CORE plugins/aicoach_core/engine.cpp tools/test/aicoach/test_engine.cpp -o "$OUT/test_engine"
 g++ $FLAGS $CORE plugins/aicoach_core/engine.cpp plugins/aicoach_core/game_view.cpp tools/test/aicoach/test_view.cpp -o "$OUT/test_view"
+g++ $FLAGS -D'__declspec(x)=' -Iplugins/sdk $CORE plugins/aicoach_core/engine.cpp plugins/aicoach_core/game_view.cpp tools/test/aicoach/test_plugin.cpp -o "$OUT/test_plugin"
 echo "== data model, store =="; "$OUT/test_core"
 echo "== engine =="; "$OUT/test_engine"
 echo "== game view =="; "$OUT/test_view"
+echo "== plugin glue (fake TfModApi) =="; "$OUT/test_plugin"

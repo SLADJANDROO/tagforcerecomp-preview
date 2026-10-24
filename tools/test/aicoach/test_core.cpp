@@ -54,6 +54,14 @@ TEST(unknown_character_and_deck_ids) {
     c = good_combo(); c.character = 0; is.clear(); validate_combo(c, noctx, "c", is); CHECK(has(is, "c.decks", Issue::Error));   /* decks need a character */
     c = good_combo(); c.character = 0; c.decks.clear(); is.clear(); validate_combo(c, noctx, "c", is); CHECK(!has_errors(is));     /* shared combo, any character */
 }
+TEST(deck_ownership_follows_the_game_rules) {
+    const int ok[][2] = {{2, 1}, {2, 6}, {8, 37}, {39, 228}, {41, 240}, {142, 341}, {40, 55}, {24, 109}, {24, 133}, {85, 229}, {85, 230}};
+    for (auto &p : ok) CHECK(deck_belongs_to_character(p[0], p[1]));
+    const int bad[][2] = {{2, 7}, {2, 0}, {85, 284}, {143, 1}, {41, 241}, {9, 1}};
+    for (auto &p : bad) CHECK(!deck_belongs_to_character(p[0], p[1]));
+    Combo c = good_combo(); c.decks = {7}; Issues is; validate_combo(c, noctx, "c", is); CHECK(has(is, "decks[0]", Issue::Warning)); CHECK(!has_errors(is));   /* a warning, never a rejection */
+    c.decks = {1}; is.clear(); validate_combo(c, noctx, "c", is); CHECK(!has(is, "decks[0]", Issue::Warning));
+}
 TEST(card_ids) {
     Combo c = good_combo(); c.steps[0].card = 0; Issues is; validate_combo(c, noctx, "c", is); CHECK(has(is, "steps[0].card", Issue::Error));
     c = good_combo(); c.required_cards.push_back(0x2000); is.clear(); validate_combo(c, noctx, "c", is); CHECK(has(is, "required_cards", Issue::Error));
@@ -97,7 +105,7 @@ static std::string defaults_text() {
     d.combos = {good_combo("d.one"), good_combo("d.two")}; return serialize_defaults(d);
 }
 TEST(load_shipped_defaults_file) {
-    std::string t; CHECK(read_file(fs::path(SRCDIR) / "plugins/aicoach_core/data/defaults.json", t));
+    std::string t; CHECK(read_file(fs::path(SRCDIR) / "plugins/src/AICoach/data/defaults.json", t));
     Defaults d; LoadResult r = load_defaults(t, d, noctx); CHECK(r.status == LoadStatus::Ok); CHECK(!has_errors(r.issues)); CHECK(d.profiles.size() == 4);
 }
 TEST(defaults_roundtrip_and_malformed) {

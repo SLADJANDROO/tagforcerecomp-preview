@@ -134,6 +134,12 @@ TEST(ranking_rejects_ineligible_combos_with_a_reason) {
     FakeView u; u.unknown = {1001}; auto ru = rank_combos({ok}, ctx, u, l); CHECK(!ru[0].eligible); CHECK(ru[0].reason.find("unavailable") != std::string::npos);
     FakeView nt; nt.turn_no = 0; ru = rank_combos({pt}, ctx, nt, l); CHECK(!ru[0].eligible); CHECK(ru[0].reason.find("unavailable") != std::string::npos);
 }
+TEST(hidden_zones_do_not_make_the_reason_misleading) {
+    struct HiddenZones : FakeView { Tri has_card(Where w, uint32_t c) const override { return (w == Where::Graveyard || w == Where::Extra) ? Tri::Unknown : FakeView::has_card(w, c); } };
+    HiddenZones v; v.hand = {1001}; AttemptLedger l; SelectionContext ctx; Combo c = combo("h", {mk("s1", "normal_summon", 1002)});
+    auto r = rank_combos({c}, ctx, v, l); CHECK(!r[0].eligible); CHECK(r[0].reason.find("not in hand or on the field") != std::string::npos);
+    Combo ok = combo("ok", {mk("s1", "normal_summon", 1001)}); CHECK(rank_combos({ok}, ctx, v, l)[0].eligible);   /* present in hand: eligible even though the other zones are unreadable */
+}
 TEST(signature_bias_gates_low_priority_combos) {
     FakeView v; v.hand = {1001}; AttemptLedger l; SelectionContext ctx; Profile p; p.signature_bias = 0;
     Combo lo = combo("lo", {mk("s1", "normal_summon", 1001)}, 300), hi = combo("hi", {mk("s1", "normal_summon", 1001)}, 700);

@@ -171,7 +171,7 @@ with no images. A text-only or external editor will **not** be substituted unles
 ## 5. Files
 
 Added (this change): `plugins/aicoach_core/engine.h`, `engine.cpp`, `tools/test/aicoach/test_engine.cpp`, this document; modified: `tools/test/aicoach/run_tests.sh`.
-Planned: `plugins/src/AICoach/` (adapter, hooks, UI; `mod.txt`, `config.ini`), `plugins/aicoach_core/data/defaults.json` (real combos), possibly `plugins/sdk/tfmod.h` v7 (input capture).
+Planned: real default combos in `plugins/src/AICoach/data/defaults.json`, executor + hooks, UI, possibly `plugins/sdk/tfmod.h` v7 (input capture).
 Nothing in `runtime/`, `decomp/`, existing mods or the SDK has been changed.
 
 ## 6. Status (per feature)
@@ -229,3 +229,19 @@ If the counts or LP look implausible (not in a duel, stale memory) every answer 
 
 Caveats: the offsets come from reading the existing mods' code, not from running the game; the tests build a fake memory image from the same list, so they cannot
 catch a wrong offset. The first in-game check is the panel/log of hand and field against what the screen shows. The graveyard and extra deck need their addresses found.
+
+## 10. Observer plugin (`plugins/src/AICoach`)
+
+First plugin stage. Hooks the duel setup (`0883f4f8`, to learn each side's character and deck id) and the per-frame function; for the CPU side whose turn it is, it ranks the
+combos and shows the choice and the reasons in a panel (F4 toggles) and in the log; `F7` marks dump the full ranking. `user.json` is hot-reloaded when it changes; a bad file is
+reported and left untouched. It writes nothing to the game and all hooks return 0. See `docs/AI_COACH_TESTING.md` for the on-PC checklist.
+
+Layout: `aicoach.cpp` (glue) + `core_*.cpp` (one-line wrappers that compile each `plugins/aicoach_core` source as its own translation unit, because the build script only
+compiles a mod's own folder) + `data/defaults.json` + `config.ini` + `mod.txt`. Tested on Linux by `tools/test/aicoach/test_plugin.cpp`, which compiles the real plugin source against a
+fake `TfModApi` and fake RAM (9 scenarios: loading, hooks, panel, change-only logging, human turns, garbage memory, malformed user file, toggle persistence, marks, never writing memory).
+Not compiled with MSYS2 and not run in the game.
+
+Also added with it: `deck_belongs_to_character()` (warning when a combo's deck is not one of the character's decks by the game's own rules) and a clearer reason when a required
+card is not in hand/field but graveyard and extra deck cannot be read.
+
+Status additions: plugin glue: implemented, compiled on Linux only, harness-tested; in-game: **no**.

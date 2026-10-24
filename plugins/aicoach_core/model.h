@@ -78,6 +78,10 @@ struct Profile {
     bool enabled = true;
 };
 
+/* Does `deck` belong to `character` under the game's own rules? (ladders 2..39 = 6 decks each, 41..142 one deck each, plus the story's documented exceptions;
+ * rules and sources: decomp/common/duelists.h, docs/DECKS.md). Used for a WARNING only: unknown game versions may differ. */
+bool deck_belongs_to_character(int character, int deck);
+
 /* ---- vocabulary ---- */
 struct ParamSpec { const char *name; bool required; };
 struct ActionSpec { const char *name; std::vector<const char *> required; };

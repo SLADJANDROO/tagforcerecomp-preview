@@ -35,6 +35,15 @@ SETFN(fail_policies, {"abort", "skip", "goto", "retry_once", "fallback"})
 SETFN(interruptions, {"abort", "reevaluate", "resume"})
 SETFN(fallbacks, {"original_ai", "better_ai"})
 
+bool deck_belongs_to_character(int ch, int deck) {
+    if (ch >= 2 && ch <= 39) { const int first = 1 + 6 * (ch - 2); if (deck >= first && deck < first + 6) return true; }
+    if (ch >= 41 && ch <= 142 && ch != 85 && deck == ch + 199) return true;
+    if (ch == 85 && (deck == 229 || deck == 230)) return true;     /* Colin: special decks (his rule slot 284 is a dummy) */
+    if (ch == 40 && deck == 55) return true;                        /* Nightshroud duels with Atticus's level 1 deck */
+    if (ch == 24 && deck == 109) return true;                       /* Blair's script also names Belowski's first deck */
+    return false;
+}
+
 /* ---------------------------------------------------------------- validation */
 static bool valid_id(const std::string &s) {
     if (s.empty() || s.size() > 64) return false;
@@ -72,7 +81,12 @@ void validate_combo(const Combo &c, const ValidationContext &ctx, const std::str
     if (c.revision < 1) err(o, p + ".revision", "must be >= 1");
     if (c.character != 0 && (c.character < kMinCharacterId || c.character > kMaxCharacterId)) err(o, p + ".character", "must be 0 (any) or 2..151");
     if (c.character == 0 && !c.decks.empty()) err(o, p + ".decks", "decks need a character (deck ids are not unique across characters in the editor)");
-    for (size_t i = 0; i < c.decks.size(); i++) if (c.decks[i] < 0 || c.decks[i] > kMaxDeckId) err(o, p + ".decks[" + std::to_string(i) + "]", "deck id must be 0..350");
+    for (size_t i = 0; i < c.decks.size(); i++) {
+        const std::string dp = p + ".decks[" + std::to_string(i) + "]";
+        if (c.decks[i] < 0 || c.decks[i] > kMaxDeckId) err(o, dp, "deck id must be 0..350");
+        else if (c.character != 0 && !deck_belongs_to_character(c.character, c.decks[i]))
+            warn(o, dp, "deck " + std::to_string(c.decks[i]) + " is not one of character " + std::to_string(c.character) + "'s decks by the game's rules (kept; other game versions may differ)");
+    }
     if (c.priority < 0 || c.priority > 1000) err(o, p + ".priority", "must be 0..1000");
     if (!interruptions().count(c.interruption)) err(o, p + ".interruption", "must be abort, reevaluate or resume");
     if (!c.preferred_phase.empty() && !phases().count(c.preferred_phase)) err(o, p + ".preferred_phase", "unknown phase");

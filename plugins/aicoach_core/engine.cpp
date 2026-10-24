@@ -106,7 +106,12 @@ std::vector<Candidate> rank_combos(const std::vector<Combo> &combos, const Selec
         bool bad = false;
         for (uint32_t rc : c.required_cards) {
             const Tri a = available(view, rc); k.checks.push_back({a, "required card " + std::to_string(rc) + " available: " + tri_name(a)});
-            if (a != Tri::Yes && !bad) { bad = true; k.reason = a == Tri::No ? "missing required card " + std::to_string(rc) : "state unavailable for required card " + std::to_string(rc); }
+            if (a != Tri::Yes && !bad) {
+                bad = true;
+                if (a == Tri::No) k.reason = "missing required card " + std::to_string(rc);
+                else if (view.has_card(Where::Hand, rc) == Tri::No && view.has_card(Where::Field, rc) == Tri::No) k.reason = "required card " + std::to_string(rc) + " is not in hand or on the field (graveyard / extra deck cannot be read)";
+                else k.reason = "state unavailable for required card " + std::to_string(rc);
+            }
         }
         if (bad) { k.eligible = false; out.push_back(k); continue; }
         const Tri st = eval_all(c.conditions, env, &k.checks);

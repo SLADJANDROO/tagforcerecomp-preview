@@ -1,0 +1,4 @@
+name=AI Coach (observer)
+author=Tag Force Recomp
+version=0.1
+description=Work in progress. Reads the duel, ranks the data-defined combos for the CPU side and shows (panel, F4) which one it WOULD pick and why. Does not change how the CPU plays yet. Combos: data/defaults.json and user.json
