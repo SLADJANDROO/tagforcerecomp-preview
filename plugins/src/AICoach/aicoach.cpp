@@ -162,8 +162,24 @@ extern "C" __declspec(dllexport) int tfmod_init(const TfModApi *api) {
     return 0;
 }
 /* F7 / L3+R3 mark: dump the full ranking with every check, for the side whose turn it is (or both when unclear) */
+/* Read-only probe for the Destiny Draw research (docs/DESTINY_DRAW_RESEARCH.md): raw hand and deck-array words of both sides.
+ * The layout (hand at +0x120, deck order at +0x3a0, both u32 entries with the card id in the low 13 bits) was observed in Tag Force 2 USA only;
+ * this log is how we find out whether Tag Force 1 uses the same one. Nothing is written. */
+static void probe_deck_layout(const Mem &m) {
+    for (int p = 0; p < 2; p++) {
+        const uint32_t b = 0x09f79cec + (uint32_t)p * 0xfac;
+        const uint32_t hand = m.u32(b + 0x0c), deck = m.u32(b + 0x10);
+        if (hand > 12 || deck > 80) { A->log("[probe] side %d: hand=%u deck=%u (not plausible)", p, hand, deck); continue; }
+        A->log("[probe] side %d: LP=%d hand=%u deck=%u", p, (int)m.u32(b), hand, deck);
+        std::string h; char t[24]; for (uint32_t i = 0; i < hand; i++) { snprintf(t, sizeof t, " %08x", m.u32(b + 0x120 + i * 4)); h += t; }
+        A->log("[probe]   hand @+0x120:%s", h.c_str());
+        std::string d; for (uint32_t i = 0; i < 8; i++) { snprintf(t, sizeof t, " %08x", m.u32(b + 0x3a0 + i * 4)); d += t; }
+        A->log("[probe]   deck @+0x3a0 first 8:%s", d.c_str());
+        if (deck > 2) { std::string e; for (uint32_t i = deck - 2; i < deck + 2; i++) { snprintf(t, sizeof t, " %08x", m.u32(b + 0x3a0 + i * 4)); e += t; } A->log("[probe]   deck @+0x3a0 [count-2 .. count+1]:%s", e.c_str()); }
+    }
+}
 extern "C" __declspec(dllexport) void tfmod_marca(int n) {
-    Mem m; A->log("[mark #%d] AI Coach ranking", n);
+    Mem m; A->log("[mark #%d] AI Coach ranking", n); probe_deck_layout(m);
     for (int p = 0; p < 2; p++) {
         GameDuelView v(m, p); if (!v.plausible()) { A->log("[mark] side %d: duel state not plausible", p); continue; }
         SelectionContext ctx; ctx.character = g_char[p]; ctx.deck = g_deck[p]; ctx.profile = profile_for(g_char[p]);

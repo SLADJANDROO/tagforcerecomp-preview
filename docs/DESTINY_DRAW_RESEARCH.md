@@ -28,5 +28,15 @@ and the same 32-bit entry was appended to the hand (hand count 6 -> 7). So the "
 - The trigger check, the menu code that adds the "Destiny Draw" command, and the random pick (all code, not data).
 - Everything on the Tag Force 1 side.
 
+## Where the Destiny mark is stored: NOT found (and not needed for the port)
+Deck Edit states with a card marked / cleared differ only in screen-drawing data; the deck structure (name at 0x08ab2f40, count 0x28, 40 ids) is identical
+in both. The PSP save files (DATA0) are encrypted, so diffing them is useless. The TF1 port does not need TF2's storage format anyway: TF1 has no marking
+UI, so marks will live in the mod's own file (keyed by deck), and the effect only needs the deck array and the hand (above).
+
+## Tag Force 1 probe (read-only)
+`AICoach` F7 mark now also logs `[probe]` lines: both sides' LP, hand/deck counts, the raw hand words (+0x120) and the first deck-array words (+0x3a0)
+plus the words around the end of the deck. If TF1 uses the TF2 layout, the hand ids should match what the F6 panel shows and the deck array should be
+a list of u32 entries (id in the low 13 bits) whose first entry is the top card.
+
 ## Next evidence wanted
 Deck Edit states with one card marked as Destiny vs unmarked; the same duel menu in Tag Force 1 (to confirm the TF1 layout is what the AI Coach already assumes).
