@@ -159,7 +159,7 @@ with no images. A text-only or external editor will **not** be substituted unles
 | 1 | This audit | reviewed |
 | 2 | Data model, validation, store, tests | 23 unit tests pass under ASan/UBSan |
 | 3a | **Engine core** (this change): evaluation, ranking, runner, ledger, with fakes | engine unit tests pass; behaviour list in `test_engine.cpp` |
-| 3b | Game adapter `DuelView` (read-only) + panel diagnostics | on the user's machine: panel shows hand/field/LP matching the game during a duel |
+| 3b | Game adapter `DuelView` (read-only) — code and unit tests done (section 9); plugin wiring + panel diagnostics still to do | on the user's machine: panel shows hand/field/LP matching the game during a duel |
 | 4 | Profiles + deck assignment + shared combos wired to the real character/deck ids | log line "char X deck Y -> N combos" at duel start for 3 known duelists |
 | 5 | First end-to-end combo through the real game (needs the control mod / chosen backend) | duel log shows steps, state verification, one forced failure recovered; duel finishes |
 | 6 | Menu: browse characters/decks/combos, enable/disable, priority | in-game navigation with pad only; input does not leak |
@@ -182,7 +182,8 @@ Legend: **I** implemented · **C** compiled · **U** unit-tested · **G** integr
 |---|---|---|---|---|---|
 | JSON parser, model, validation, defaults/user store, migration, import/export | yes | yes (Linux g++) | yes (23 tests) | no | no |
 | Condition evaluation, combo ranking, runner, attempt ledger (section 7) | yes | yes (Linux g++, `-Wall -Wextra -Wpedantic` clean) | yes (18 tests, ASan/UBSan; 3 deliberate bugs injected and caught) | no | no |
-| Game adapter, hooks, menu, editor | no | no | no | no | no |
+| Read-only `GameDuelView` over the documented memory layout (`game_view.*`, section 9) | yes | yes (Linux g++, clean) | yes (7 tests, against a fake memory image) | no | no |
+| Plugin wiring (`tfmod_init`, hooks, `api->mem` bridge), action executor, menu, editor | no | no | no | no | no |
 
 Nothing is verified in the running game. This workspace cannot run the game (no Windows, no ISO).
 
@@ -218,3 +219,13 @@ reading real game memory, target-selection policies (the executor receives `targ
 1. Obtain the opponent-control mod (see 1.2) and a short `TF_HOOK_TRACE` session on the EU build to find the AI tick and the pending-action layout. Decide backend A/B.
 2. Milestone 3b: read-only `DuelView` over the memory map in 1.1, shown in a `panel`. Compile with MSYS2 on your machine; a diagnostic log line at duel start
    ("character X, deck Y, N combos") is the first thing to verify in the running game.
+
+## 9. Game view (Milestone 3b, part 1)
+
+`plugins/aicoach_core/game_view.h|cpp`: `GameDuelView` implements `DuelView` over a `GuestMemory` interface (the plugin will implement it with `api->mem()`).
+It reads hand, field (monsters, spell/trap, field spell), positions from the face-up/defense flags, free zones, LP, opponent monster count and turn owner, using the
+offsets listed at the top of `game_view.h`. Everything the game is not known to expose answers Unknown: graveyard, extra deck, phase, turn number, action legality.
+If the counts or LP look implausible (not in a duel, stale memory) every answer is Unknown / -1.
+
+Caveats: the offsets come from reading the existing mods' code, not from running the game; the tests build a fake memory image from the same list, so they cannot
+catch a wrong offset. The first in-game check is the panel/log of hand and field against what the screen shows. The graveyard and extra deck need their addresses found.
