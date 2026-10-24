@@ -1,0 +1,4 @@
+name=Destiny Draw
+author=Tag Force Recomp
+version=0.1
+description=Tag Force 2's Destiny Draw for Tag Force 1. When your LP is below 4000 and the opponent is stronger, press F2 (once per duel): a random Destiny Card from your deck goes to the top, so your next draw is that card. Set your Destiny Cards in config.ini.
